@@ -8,13 +8,12 @@ import java.util.*;
  * TODO 제출전: 맞춤법, 주석, 변수,메소드 명 체크
  * TODO 예외 처리(puzzleSize == 0, puzzleSize == 1, puzzle 입력값이 size 넘는 경우, 음수가 들어오는 경우, puzzleSize = 3이상이 들어오는 경우 A* 알고리즘 alert)
  * TODO 시간 계산 넣기
- *
+ * TODO static -> 변경
+ * TODO 3입력시 랜덤 3 *3 퍼즐 생성하기
  * solvalbleCheck 역전 카운트란 초기 상태와 목표 상태에서 이동 가능유무를 파악하는 조건 -> 적용 안될 때 return -1과 print 메시지, 초기화를 해주자.
  *
  */
 public class Main {
-
-
 
     //입력 값으로 퍼즐 생성
     public static int createPuzzleItem(Scanner sc) throws IllegalArgumentException {
@@ -66,12 +65,12 @@ public class Main {
 
     public static int[] transformNonLinearToLinear(int puzzleLength, int[][] puzzleArr) {
         int[] linearPuzzleArr = new int[puzzleLength];
-        int k = 0;
+        int index = 0;
 
         for (int i = 0; i < puzzleArr.length; i++) {
             for (int j = 0; j < puzzleArr.length; j++) {
-                linearPuzzleArr[k] = puzzleArr[i][j];
-                k++;
+                linearPuzzleArr[index] = puzzleArr[i][j];
+                index++;
             }
         }
         return linearPuzzleArr;
@@ -140,6 +139,14 @@ public class Main {
         return false;
     }
 
+//    public static int calculateInversionCount(int puzzleLength, int[] linearPuzzleArr) {
+//        if (linearPuzzleArr.length < 2) {
+//        }
+//        int mid = linearPuzzleArr.length / 2;
+//        int[] lowArr = sort(Arrays.copyOfRange(linearPuzzleArr, 0, mid));
+//
+//    }
+    //TODO insert sort -> merge sort로 변경하기
     public static int calculateInversionCount(int puzzleLength, int[] linearPuzzleArr) {
         int inversionCount = 0;
 
@@ -161,9 +168,8 @@ public class Main {
     이동 횟수는 가로 방향과 세로 방향으로 이동하는 횟수의 합입니다.
     모든 타일의 최소 이동 횟수를 더하여 결과를 반환합니다.
      */
-
-
     public static int findMovingCount(int puzzleSize , int[][] puzzleArr) {
+
         return 0;
     }
 
