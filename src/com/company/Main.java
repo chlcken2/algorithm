@@ -1,7 +1,6 @@
 package com.company;
 
 
-import javax.xml.soap.Node;
 import java.util.*;
 
 
@@ -18,9 +17,14 @@ public class Main {
 
 
     //입력 값으로 퍼즐 생성
-    public static int createPuzzleItem(Scanner sc) {
+    public static int createPuzzleItem(Scanner sc) throws IllegalArgumentException {
         System.out.print("생성할 puzzle의 사이즈를 입력하세요:");
         int puzzleSize = sc.nextInt();
+
+        if (puzzleSize == 0 || puzzleSize == 1) {
+            throw new IllegalArgumentException("0 또는 1을 입력할 수 없습니다.");
+        }
+
         int[][] puzzleArr = new int[puzzleSize][puzzleSize];
         System.out.println("-----------------------------");
         System.out.println("완성해야할 퍼즐 모양 = " + Arrays.deepToString(createFinalPuzzleForm(puzzleSize)));
@@ -30,13 +34,16 @@ public class Main {
         for (int i = 0; i < puzzleSize; i++) {
             for (int j = 0; j < puzzleSize; j++) {
                 System.out.print("(" + i + "," + j + ") 위치에 생성할 puzzle의 값을 입력하세요:");
-                puzzleArr[i][j] = sc.nextInt();
+                int value= sc.nextInt();
+                if (value < 0 || value >= puzzleSize * puzzleSize) {
+                    throw new IllegalArgumentException("잘못된 퍼즐 사이즈를 입력하였습니다.");
+                }
+                puzzleArr[i][j] = value;
                 System.out.println(Arrays.deepToString(puzzleArr));
             }
         }
-        sc.close();
-        System.out.println();
 
+        System.out.println();
         return isSolvablePuzzleCheck(puzzleSize, puzzleArr);
     }
 
@@ -86,7 +93,7 @@ public class Main {
         //puzzleSize가 홀수 이면서, inversionCount가 짝수일 때
         if (puzzleSize % 2 != 0 && inversionCount % 2 == 0) {
             System.out.println("puzzleSize가 홀수의 경우이면서 inversionCount가 짝수일 때 로직 실행");
-            return findMovingCount(puzzleArr);
+            return findMovingCount(puzzleSize, puzzleArr);
         }
 
         //puzzleSize가 짝수 일때
@@ -98,13 +105,13 @@ public class Main {
             //빈값(0)의 위치가 짝수이면서, 역전 카운트가 홀수일 때 이동 가능
             if (isEvenEmptyRow && inversionCount % 2 != 0) {
                 System.out.println("빈값(0)의 위치가 짝수이면서, 역전 카운트가 홀수일 때 실행");
-                return findMovingCount(puzzleArr);
+                return findMovingCount(puzzleSize, puzzleArr);
             }
 
             //빈값(0)의 위치가 홀수이면서, 역전 카운트가 짝수일때 이동가능
             if (!isEvenEmptyRow && inversionCount % 2 == 0) {
                 System.out.println("빈값(0)의 위치가 홀수이면서, 역전 카운트가 짝수일때 실행" );
-                return findMovingCount(puzzleArr);
+                return findMovingCount(puzzleSize, puzzleArr);
             }
             System.out.println("-----------------------------");
             System.out.println("해당 퍼즐은 풀 수 없는 퍼즐입니다.");
@@ -147,28 +154,32 @@ public class Main {
         return inversionCount;
     }
 
-    // 문제 해결 가능시 최종 이동 횟수 구하는 로직
-    // 주입 받은 배열과, 상태가 되어야하는 로직을 가지고
-    //  Select Sort로 사용시 경우의 수가 1개일 경우 2개로 카운트 친다 이유가 뭘까?
-    //  문제를 BFS로 접근? merge sort로 접근? select Sort로 접근?? 차이는? clear
-    public static int findMovingCount(int[][] puzzleArr) {
-        int resultCount = 0;
-        // puzzleArr에서  노드 좌표 선택하기
-        // 노드 좌표 open[]에 넣기
-        //
+    //A*를 이용하여 알고리즘 해결하기.
+    /*
+    각 타일의 현재 위치와 목표 위치를 계산합니다.
+    각 타일이 목표 위치로 이동하기 위해 필요한 최소 이동 횟수를 계산합니다.
+    이동 횟수는 가로 방향과 세로 방향으로 이동하는 횟수의 합입니다.
+    모든 타일의 최소 이동 횟수를 더하여 결과를 반환합니다.
+     */
 
 
-        return resultCount;
-}
+    public static int findMovingCount(int puzzleSize , int[][] puzzleArr) {
+        return 0;
+    }
 
 
     public static void main(String[]args) {
         Scanner sc = new Scanner(System.in);
-        int puzzle = createPuzzleItem(sc);
-        if (puzzle == -1) {
-            System.out.println("해당 퍼즐은 문제를 풀 수 없습니다. 입력값을 확인하세요.");
-            return;
+
+        try {
+            int puzzle = createPuzzleItem(sc);
+            System.out.println("총 이동횟수: " + puzzle + "번");
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            System.out.println("알 수 없는 에러가 발생했습니다. 재실행 해주시기 바랍니다.");
+        } finally {
+            sc.close();
         }
-        System.out.println("총 이동횟수: " + puzzle + "번");
     }
 }
