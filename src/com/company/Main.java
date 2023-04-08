@@ -8,16 +8,13 @@ import java.util.*;
  * TODO 제출전: 맞춤법, 주석, 변수,메소드 명 체크
  * TODO 예외 처리(puzzleSize == 0, puzzleSize == 1, puzzle 입력값이 size 넘는 경우, 음수가 들어오는 경우, puzzleSize = 3이상이 들어오는 경우 A* 알고리즘 alert)
  * TODO 시간 계산 넣기
- * TODO static -> 변경
- * TODO 3입력시 랜덤 3 *3 퍼즐 생성하기
+ * TODO static -> 변경 clear
+ * TODO 3입력시 랜덤 3 *3 퍼즐 생성하는걸로? 아님 입력?
  * solvalbleCheck 역전 카운트란 초기 상태와 목표 상태에서 이동 가능유무를 파악하는 조건 -> 적용 안될 때 return -1과 print 메시지, 초기화를 해주자.
- *
  */
 public class Main {
 
-    //입력 값으로 퍼즐 생성
-    public static int createPuzzleItem(Scanner sc) throws IllegalArgumentException {
-        System.out.print("생성할 puzzle의 사이즈를 입력하세요:");
+    private int createPuzzleItem(Scanner sc) throws IllegalArgumentException {
         int puzzleSize = sc.nextInt();
 
         if (puzzleSize == 0 || puzzleSize == 1) {
@@ -25,15 +22,11 @@ public class Main {
         }
 
         int[][] puzzleArr = new int[puzzleSize][puzzleSize];
-        System.out.println("-----------------------------");
-        System.out.println("완성해야할 퍼즐 모양 = " + Arrays.deepToString(createFinalPuzzleForm(puzzleSize)));
-        System.out.println("-----------------------------");
-        System.out.println();
 
         for (int i = 0; i < puzzleSize; i++) {
             for (int j = 0; j < puzzleSize; j++) {
                 System.out.print("(" + i + "," + j + ") 위치에 생성할 puzzle의 값을 입력하세요:");
-                int value= sc.nextInt();
+                int value = sc.nextInt();
                 if (value < 0 || value >= puzzleSize * puzzleSize) {
                     throw new IllegalArgumentException("잘못된 퍼즐 사이즈를 입력하였습니다.");
                 }
@@ -46,24 +39,7 @@ public class Main {
         return isSolvablePuzzleCheck(puzzleSize, puzzleArr);
     }
 
-    public static int[][] createFinalPuzzleForm(int puzzleSize) {
-        int[][] defaultPuzzleArr = new int[puzzleSize][puzzleSize];
-        int startValue = 1;
-
-        for (int i = 0; i < puzzleSize; i++) {
-            for(int j = 0; j < puzzleSize; j++) {
-                if (i == puzzleSize-1 && j == puzzleSize-1) {
-                    defaultPuzzleArr[i][j] = 0;
-                    break;
-                }
-                defaultPuzzleArr[i][j] = startValue;
-                startValue++;
-            }
-        }
-        return defaultPuzzleArr;
-    }
-
-    public static int[] transformNonLinearToLinear(int puzzleLength, int[][] puzzleArr) {
+    private int[] transformNonLinearToLinear(int puzzleLength, int[][] puzzleArr) {
         int[] linearPuzzleArr = new int[puzzleLength];
         int index = 0;
 
@@ -76,55 +52,35 @@ public class Main {
         return linearPuzzleArr;
     }
 
-    // 생성된 퍼즐 전달 및 해당 퍼즐로 문제 해결 가능 유무 체크
-    // 역전 카운트 부분 병합정렬 로직 - 근데 이걸 왜 써야할까? -> 0을 제외한 앞뒤 숫자를 비교해서 역전 카운트 숫자를 구해서 정렬 할 수 있는지 없는지 체크한다.
-    // 역전 카운트 숫자를 통해서 어떻게 정렬할 수 있는지 없는지 구분할 수 있을까?
-    // 주어진 배열에서 자신의 앞에 있는 수중 자신보다 크기가 큰 수의 갯수를 찾기 위한 방법
-    public static int isSolvablePuzzleCheck(int puzzleSize, int[][] puzzleArr) {
+    // 얼리 리턴 적용해보기
+    private int isSolvablePuzzleCheck(int puzzleSize, int[][] puzzleArr) {
         int puzzleLength = puzzleSize * puzzleSize;
         int[] linearPuzzleArr = transformNonLinearToLinear(puzzleLength, puzzleArr);
         int inversionCount = calculateInversionCount(puzzleLength, linearPuzzleArr);
-        System.out.println("-----------------------------");
-        System.out.println("linearPuzzleArr: " + Arrays.toString(linearPuzzleArr));
-        System.out.println("inversionCount: " + inversionCount);
-        System.out.println("-----------------------------");
 
-        //puzzleSize가 홀수 이면서, inversionCount가 짝수일 때
         if (puzzleSize % 2 != 0 && inversionCount % 2 == 0) {
-            System.out.println("puzzleSize가 홀수의 경우이면서 inversionCount가 짝수일 때 로직 실행");
-            return findMovingCount(puzzleSize, puzzleArr);
+            return goMovingCount(puzzleSize, puzzleArr, 0);
         }
 
-        //puzzleSize가 짝수 일때
         if (puzzleSize % 2 == 0) {
-            //빈칸의 행의 위치가 홀수인지 짝인지  찾기
             boolean isEvenEmptyRow = isEvenEmptyRow(puzzleArr);
 
-            System.out.println("뒤에서 부터 계산한 evenEmptyRow의 짝수='true', 홀수='false': " + isEvenEmptyRow);
-            //빈값(0)의 위치가 짝수이면서, 역전 카운트가 홀수일 때 이동 가능
             if (isEvenEmptyRow && inversionCount % 2 != 0) {
-                System.out.println("빈값(0)의 위치가 짝수이면서, 역전 카운트가 홀수일 때 실행");
-                return findMovingCount(puzzleSize, puzzleArr);
+                return goMovingCount(puzzleSize, puzzleArr, 0);
             }
 
-            //빈값(0)의 위치가 홀수이면서, 역전 카운트가 짝수일때 이동가능
             if (!isEvenEmptyRow && inversionCount % 2 == 0) {
-                System.out.println("빈값(0)의 위치가 홀수이면서, 역전 카운트가 짝수일때 실행" );
-                return findMovingCount(puzzleSize, puzzleArr);
+                return goMovingCount(puzzleSize, puzzleArr, 0);
             }
-            System.out.println("-----------------------------");
-            System.out.println("해당 퍼즐은 풀 수 없는 퍼즐입니다.");
             return -1;
         }
-        System.out.println("-----------------------------");
-        System.out.println("해당 퍼즐은 풀 수 없는 퍼즐입니다.");
         return -1;
     }
 
-    public static boolean isEvenEmptyRow(int[][] puzzleArr) {
+    private boolean isEvenEmptyRow(int[][] puzzleArr) {
         int emptyRowIndex = -1;
 
-        for (int i = puzzleArr.length -1; i >= 0; i--) {
+        for (int i = puzzleArr.length - 1; i >= 0; i--) {
             for (int j = 0; j < puzzleArr.length; j++) {
                 if (puzzleArr[i][j] == 0) {
                     emptyRowIndex = i;
@@ -139,15 +95,8 @@ public class Main {
         return false;
     }
 
-//    public static int calculateInversionCount(int puzzleLength, int[] linearPuzzleArr) {
-//        if (linearPuzzleArr.length < 2) {
-//        }
-//        int mid = linearPuzzleArr.length / 2;
-//        int[] lowArr = sort(Arrays.copyOfRange(linearPuzzleArr, 0, mid));
-//
-//    }
     //TODO insert sort -> merge sort로 변경하기
-    public static int calculateInversionCount(int puzzleLength, int[] linearPuzzleArr) {
+    private int calculateInversionCount(int puzzleLength, int[] linearPuzzleArr) {
         int inversionCount = 0;
 
         for (int i = 0; i < puzzleLength; i++) {
@@ -157,28 +106,112 @@ public class Main {
                 }
             }
         }
-
         return inversionCount;
     }
 
-    //A*를 이용하여 알고리즘 해결하기.
-    /*
-    각 타일의 현재 위치와 목표 위치를 계산합니다.
-    각 타일이 목표 위치로 이동하기 위해 필요한 최소 이동 횟수를 계산합니다.
-    이동 횟수는 가로 방향과 세로 방향으로 이동하는 횟수의 합입니다.
-    모든 타일의 최소 이동 횟수를 더하여 결과를 반환합니다.
-     */
-    public static int findMovingCount(int puzzleSize , int[][] puzzleArr) {
+    private boolean isFinish(int puzzleSize, int[][] puzzleArr) {
+        for (int i = 0; i < puzzleSize; i++) {
+            for (int j = 0; j < puzzleSize; j++) {
+                int defaultValue = (i * puzzleSize + j) + 1;
+                int compareValue = puzzleArr[i][j];
 
-        return 0;
+                if (i == puzzleSize - 1 && j == puzzleSize - 1) {
+                    defaultValue = 0;
+                }
+
+                if (defaultValue != compareValue) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private Pos findZeroPosition(int puzzleSize, int[][] puzzleArr) {
+        for (int i = 0; i < puzzleSize; i++) {
+            for (int j = 0; j < puzzleSize; j++) {
+                if (puzzleArr[i][j] == 0) {
+                    return new Pos(i, j);
+                }
+            }
+        }
+        return null;
+    }
+
+    private int goMovingCount(int puzzleSize, int[][] puzzleArr, int movingCount) {
+        if (isFinish(puzzleSize, puzzleArr)) {
+            return movingCount;
+        }
+
+        Pos zeroPosition = findZeroPosition(puzzleSize, puzzleArr);
+
+        //TODO 0이 가려고하는 위치
+        int minimumValue = puzzleSize * puzzleSize;
+        int nextZeroDir = 0;
+        //상우하좌 탐색 하며, 탐색 상태의 0의 위치를 만드는 배열 newArr를 통해 복사전 배열 생성
+        for (int p = 0; p < 4; p++) {
+            int newRow = zeroPosition.moveRow(p);
+            int newCol = zeroPosition.moveCol(p);
+            int[][] newArr = new int[puzzleSize][puzzleSize];
+
+            if (newRow < 0 || newCol < 0 || newRow > puzzleSize - 1 || newCol > puzzleSize - 1) {
+                continue;
+            }
+
+            for (int i = 0; i < puzzleSize; i++) {
+                newArr[i] = puzzleArr[i].clone();
+            }
+
+            //
+            int temp = newArr[newRow][newCol];
+            newArr[newRow][newCol] = newArr[zeroPosition.getRow()][zeroPosition.getCol()];
+            newArr[zeroPosition.getRow()][zeroPosition.getCol()] = temp;
+
+            int diff = 0;
+            for (int i = 0; i < puzzleSize; i++) {
+                for (int j = 0; j < puzzleSize; j++) {
+                    System.out.printf("%d", newArr[i][j]);
+                    if (newArr[i][j] == 0) {
+                        continue;
+                    }
+
+                    int defaultValue = (i * puzzleSize + j) + 1;
+
+                    if (defaultValue != newArr[i][j]) {
+                        diff++;
+                    }
+                }
+                System.out.println();
+            }
+            int HeuristicsValue = (movingCount + 1) + diff;
+
+            if (minimumValue > HeuristicsValue) {
+                minimumValue = HeuristicsValue;
+            }
+        }
+
+        int[][] newArr = new int[puzzleSize][puzzleSize];
+        for (int i = 0; i < puzzleSize; i++) {
+            for (int j = 0; j < puzzleSize; j++) {
+                newArr[j] = puzzleArr[j].clone();
+            }
+        }
+        Pos newPosition = new Pos(zeroPosition.moveRow(nextZeroDir), zeroPosition.moveCol(nextZeroDir));
+
+        int temp = newArr[newPosition.getRow()][newPosition.getCol()];
+        newArr[newPosition.getRow()][newPosition.getCol()] = newArr[zeroPosition.getRow()][zeroPosition.getCol()];
+        newArr[zeroPosition.getRow()][zeroPosition.getCol()] = temp;
+
+        return goMovingCount(puzzleSize, newArr, movingCount + 1);
     }
 
 
-    public static void main(String[]args) {
+    public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
+        Main main = new Main();
 
         try {
-            int puzzle = createPuzzleItem(sc);
+            int puzzle = main.createPuzzleItem(sc);
             System.out.println("총 이동횟수: " + puzzle + "번");
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
@@ -187,5 +220,34 @@ public class Main {
         } finally {
             sc.close();
         }
+    }
+}
+
+class Pos {
+    int row;
+    int col;
+
+    final int[] dRow = {-1, 0, 1, 0};
+    final int[] dCol = {0, 1, 0, -1};
+
+    public Pos(int row, int col) {
+        this.row = row;
+        this.col = col;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public int getCol() {
+        return col;
+    }
+
+    public int moveRow(int dir) {
+        return this.row + dRow[dir];
+    }
+
+    public int moveCol(int dir) {
+        return this.col + dCol[dir];
     }
 }
