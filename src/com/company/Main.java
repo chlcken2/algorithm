@@ -6,7 +6,6 @@ import java.util.*;
  * TODO 제출전: 맞춤법, 주석, 변수,메소드 명 체크
  * TODO 예외 처리(puzzleSize == 0, puzzleSize == 1, puzzle 입력값이 size 넘는 경우, 음수가 들어오는 경우, puzzleSize = 3이상이 들어오는 경우 A* 알고리즘 alert)
  * TODO 시간 계산 넣기
- * TODO static -> 변경 clear
  * TODO 3입력시 랜덤 3 *3 퍼즐 생성하는걸로? 아님 입력?
  * solvalbleCheck 역전 카운트란 초기 상태와 목표 상태에서 이동 가능유무를 파악하는 조건 -> 적용 안될 때 return -1과 print 메시지, 초기화를 해주자.
  */
@@ -48,7 +47,7 @@ public class Main {
         return linearPuzzleArr;
     }
 
-    // 얼리 리턴 적용전
+    // 얼리 리턴 적용
     private int isSolvablePuzzleCheck(int puzzleSize, int[][] puzzleArr) {
         int puzzleLength = puzzleSize * puzzleSize;
         int[] linearPuzzleArr = transformNonLinearToLinear(puzzleLength, puzzleArr);
@@ -70,29 +69,6 @@ public class Main {
             }
         }
         return goMovingCount(puzzleSize, puzzleArr, 0);
-    }
-
-    public boolean isImpossiblePuzzle(int puzzleSize, int[][] puzzleArr) {
-        int puzzleLength = puzzleSize * puzzleSize;
-        int[] linearPuzzleArr = transformNonLinearToLinear(puzzleLength, puzzleArr);
-        int inversionCount = calculateInversionCount(puzzleLength, linearPuzzleArr);
-
-        if (puzzleSize % 2 != 0 && inversionCount % 2 != 0) {
-            return true;
-        }
-
-        if (puzzleSize % 2 == 0) {
-            boolean isEvenEmptyRow = isEvenEmptyRow(puzzleArr);
-
-            if (isEvenEmptyRow && inversionCount % 2 == 0) {
-                return true;
-            }
-            if (!isEvenEmptyRow && inversionCount % 2 != 0) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private boolean isEvenEmptyRow(int[][] puzzleArr) {
@@ -225,12 +201,6 @@ public class Main {
                 newArr[j] = puzzleArr[j].clone();
             }
         }
-        System.out.println(movingCount);
-        System.out.println(nextZeroDir);
-        System.out.printf("%d,%d" , zeroRow, zeroCol);
-        System.out.println();
-        System.out.printf("%d,%d" , dRow[nextZeroDir], dCol[nextZeroDir]);
-        System.out.println();
 
         int newRow = zeroRow + dRow[nextZeroDir];
         int newCol = zeroCol + dCol[nextZeroDir];
